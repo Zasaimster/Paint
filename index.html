@@ -1,0 +1,36 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Paint Application</title>
+  <meta name="author" content="Saim Ahmad">
+
+  <link rel="stylesheet" href="./paint.css">
+
+</head>
+
+<body>
+        <div class="side-bar">
+            <div class="range">
+                Cursor Size
+                <br>
+                <input type="range" min="1" max ="20" value="5" class="size-slider" />
+            </div>
+            <div class="colors">
+                <input type="button" style="background-color: black" id="black-brush" class="color-selector" />
+                <input type="button" style="background-color: red" id="red-brush" class="color-selector" />
+                <input type="button" style="background-color: green" id="green-brush" class="color-selector" />
+                <input type="button" style="background-color: blue" id="blue-brush" class="color-selector" />
+            </div>
+
+            <div class="buttons">
+                <button class="eraser"> Eraser </button>
+                <button class="undo" > Undo </button>
+            </div>
+        </div>
+    <canvas id="canvas"></canvas>
+  <script src="./paint.js"></script>
+</body>
+</html>
