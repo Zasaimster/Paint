@@ -105,22 +105,60 @@ const handleFreeDraw = (e) => {
 };
 
 const handleDrawingCircle = (e) => {
-	console.log('in drawing circle');
 	const x = e.clientX;
 	const y = e.clientY;
 
-	const xRadius = Math.abs(x - startingX) / 2;
-	const yRadius = Math.abs(y - startingY) / 2;
-	const xCenter = (x - startingX) / 2 + startingX;
-	const yCenter = (y - startingY) / 2 + startingY;
+	let top = pointsData.pop();
+	let innerPoints = top.innerPoints;
+	redrawPoints();
+
+	const startX = innerPoints[0].xPos;
+	const startY = innerPoints[0].yPos;
+
+	const xRadius = Math.abs(x - startX) / 2;
+	const yRadius = Math.abs(y - startY) / 2;
+	const cX = (x - startX) / 2 + startX;
+	const cY = (y - startY) / 2 + startY;
 
 	ctx.lineWidth = 5;
 	ctx.lineCap = 'round';
 
 	ctx.beginPath();
-	ctx.ellipse(xCenter, yCenter, xRadius, yRadius, 0, 0, 2 * Math.PI);
+	ctx.ellipse(cX, cY, xRadius, yRadius, 0, 0, 2 * Math.PI);
 	ctx.stroke();
+
+	innerPoints.pop();
+	//save the starting coordinate in the 0th index
+	innerPoints.push({
+		xPos: startX,
+		yPos: startY,
+		cX,
+		cY,
+		xRadius,
+		yRadius,
+	});
+	//newInnerPoints = getEllipsePoints(newInnerPoints, cX, cY, xRadius, yRadius);
+	top = {
+		...top,
+		innerPoints,
+	};
+
+	pointsData.push(top);
 };
+
+/* const getEllipsePoints = (arr, cX, cY, rX, rY) => {
+	for (var theta = 0; theta < 2 * Math.PI; theta += 0.01) {
+		var xPos = cX + rX * Math.cos(theta);
+		var yPos = cY - rY * Math.sin(theta);
+		arr.push({
+			xPos,
+			yPos,
+		});
+	}
+
+	return arr;
+};
+*/
 
 const handleDrawingRect = (e) => {
 	const x = e.clientX;
@@ -143,7 +181,7 @@ const handleDrawingRect = (e) => {
 	ctx.stroke();
 
 	// let innerPoints = top.innerPoints;
-	let newInnerPoints = addRectanglePoints(startX, startY, width, height);
+	let newInnerPoints = getRectanglePoints(startX, startY, width, height);
 	top = {
 		...top,
 		innerPoints: newInnerPoints,
@@ -152,7 +190,7 @@ const handleDrawingRect = (e) => {
 	pointsData.push(top);
 };
 
-const addRectanglePoints = (startX, startY, width, height) => {
+const getRectanglePoints = (startX, startY, width, height) => {
 	//insert points from top left -> top right -> bottom right -> bottom left -> top left
 	let innerPoints = [];
 	innerPoints.push({
@@ -211,12 +249,20 @@ canvas.addEventListener('mousedown', (e) => {
 
 	ctx.beginPath();
 	ctx.moveTo(e.clientX, e.clientY);
-	console.log('MOUSE DOWN')
+	console.log('MOUSE DOWN');
 
 	switch (currentDrawingState) {
 		case isDrawingCircle:
-			startingX = e.clientX;
-			startingY = e.clientY;
+			pointsData.push({
+				innerPoints: [
+					{
+						xPos: e.clientX,
+						yPos: e.clientY,
+					},
+				],
+				type: 'ellipse',
+				color: selectedColor,
+			});
 			break;
 		case isDrawingRect:
 			// startingX = e.clientX;
@@ -292,7 +338,17 @@ const redrawPoints = () => {
 		let innerPoints = pointsData[i].innerPoints;
 		ctx.strokeStyle = point.color;
 
-		for (var j = 0; j < innerPoints.length - 1; j++) {
+		var j = point.type === 'ellipse' ? 1 : 0;
+		
+		if (point.type === 'ellipse') {
+			const {cX, cY, xRadius, yRadius} = innerPoints[0];
+			ctx.beginPath();
+			ctx.ellipse(cX, cY, xRadius, yRadius, 0, 0, 2 * Math.PI);
+			ctx.stroke();
+			continue;
+		}
+
+		for (j; j < innerPoints.length - 1; j++) {
 			let currPoint = innerPoints[j];
 			let nextPoint = innerPoints[j + 1];
 
