@@ -20,7 +20,18 @@ const drawingStates = {
 let currentDrawingState = drawingStates.isFreeDrawing;
 let selectedColor = colors.default;
 let eraserColor = colors.background;
-let startingX, startingY, endingX, endingY;
+let startingX,
+	startingY,
+	endingX,
+	endingY,
+	previousX = 0,
+	previousY = 0,
+	currentX = 0,
+	currentY = 0;
+let offsetX = canvas.offsetLeft;
+let offsetY = canvas.offsetHeight;
+
+var pointsData = [];
 
 document.querySelectorAll('.color-selector').forEach((colorSelector) => {
 	console.log('in query selcetor');
@@ -52,7 +63,7 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 				selectedColor = colors.background;
 				break;
 			case 'undo':
-				console.log('handle undo!');
+				handleUndo();
 				break;
 			case 'circle':
 				currentDrawingState = drawingStates.isDrawingCircle;
@@ -62,6 +73,7 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 				break;
 			case 'free-draw':
 				currentDrawingState = drawingStates.isFreeDrawing;
+				selectedColor = colors.default;
 				break;
 			default:
 				break;
@@ -77,6 +89,28 @@ const handleFreeDraw = (e) => {
 	ctx.stroke();
 	ctx.beginPath();
 	ctx.moveTo(x, y);
+
+	// if (previousX !== currentX && previousY !== currentY) {
+
+	// }
+
+	// ctx.beginPath();
+	// ctx.moveTo(previousX, previousY);
+	// ctx.lineTo(x, y);
+	// ctx.stroke();
+
+	let top = pointsData.pop();
+	let innerPoints = top.innerPoints;
+	innerPoints.push({
+		xPos: x,
+		yPos: y,
+	});
+	top = {
+		...top,
+		innerPoints,
+	};
+
+	pointsData.push(top);
 };
 
 const handleDrawingCircle = (e) => {
@@ -102,14 +136,14 @@ const handleDrawingRect = (e) => {
 	const x = e.clientX;
 	const y = e.clientY;
 
-	const width = (x - startingX);
-	const height = (y - startingY);
+	const width = x - startingX;
+	const height = y - startingY;
 
 	ctx.lineWidth = 5;
 	ctx.lineCap = 'round';
 
 	ctx.beginPath();
-	ctx.rect(startingX, startingY, width, height)
+	ctx.rect(startingX, startingY, width, height);
 	ctx.stroke();
 };
 
@@ -141,7 +175,10 @@ canvas.addEventListener('mousemove', (e) => {
 canvas.addEventListener('mousedown', (e) => {
 	isPainting = true;
 
-	const {isDrawingCircle, isDrawingRect} = drawingStates;
+	const {isFreeDrawing, isDrawingCircle, isDrawingRect} = drawingStates;
+
+	ctx.beginPath();
+	ctx.moveTo(e.clientX, e.clientY);
 
 	switch (currentDrawingState) {
 		case isDrawingCircle:
@@ -152,6 +189,15 @@ canvas.addEventListener('mousedown', (e) => {
 			startingX = e.clientX;
 			startingY = e.clientY;
 			break;
+		case isFreeDrawing:
+			pointsData.push({
+				innerPoints: [{
+					xPos: e.clientX,
+					yPos: e.clientY
+				}],
+				type: 'free-draw',
+				color: selectedColor,
+			});
 		default:
 			break;
 	}
@@ -159,9 +205,10 @@ canvas.addEventListener('mousedown', (e) => {
 
 canvas.addEventListener('mouseup', (e) => {
 	isPainting = false;
-	ctx.beginPath();
 
-	const {isDrawingCircle, isDrawingRect} = drawingStates;
+	console.log(pointsData);
+
+	const {isFreeDrawing, isDrawingCircle, isDrawingRect} = drawingStates;
 
 	switch (currentDrawingState) {
 		case isDrawingCircle:
@@ -172,15 +219,67 @@ canvas.addEventListener('mouseup', (e) => {
 			endingX = e.clientX;
 			endingY = e.clientY;
 			break;
+		case isFreeDrawing:
+			break;
 		default:
 			break;
 	}
 });
 
+const handleUndo = () => {
+	console.log('before: ', pointsData);
+	pointsData.pop();
+
+	redrawPoints();
+
+	console.log('after: ', pointsData);
+};
+
+const redrawPoints = () => {
+	ctx.clearRect(150, 0, canvas.width, canvas.height);
+
+	if (pointsData.length === 0) {
+		return;
+	}
+
+	for (var i = 0; i < pointsData.length; i++) {
+		let point = pointsData[i];
+		let innerPoints = pointsData[i].innerPoints;
+		ctx.strokeStyle = point.color;
+
+		for (var j = 0; j < innerPoints.length - 1; j++) {
+			let currPoint = innerPoints[j];
+			let nextPoint = innerPoints[j + 1];
+
+			ctx.beginPath();
+			ctx.moveTo(currPoint.xPos, currPoint.yPos);
+			ctx.lineTo(nextPoint.xPos, nextPoint.yPos);
+			ctx.stroke();
+
+			// ctx.lineTo(currPoint.xPos, currPoint.yPos);
+			// ctx.stroke();
+			// ctx.beginPath();
+			// ctx.moveTo(innerPoints[0].startX, innerPoints[0].startY);
+		}
+
+		//resets the path to avoid drawing the last stroke upon calling ctx.stroke() again
+		//ctx.beginPath();
+	}
+};
+
+/*
+	ctx.lineTo(x, y);
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(x, y);
+*/
+
 const run = () => {
 	console.log('in run');
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
+
+	
 };
 
 window.addEventListener('load', () => {
