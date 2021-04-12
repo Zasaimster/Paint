@@ -90,15 +90,6 @@ const handleFreeDraw = (e) => {
 	ctx.beginPath();
 	ctx.moveTo(x, y);
 
-	// if (previousX !== currentX && previousY !== currentY) {
-
-	// }
-
-	// ctx.beginPath();
-	// ctx.moveTo(previousX, previousY);
-	// ctx.lineTo(x, y);
-	// ctx.stroke();
-
 	let top = pointsData.pop();
 	let innerPoints = top.innerPoints;
 	innerPoints.push({
@@ -132,19 +123,60 @@ const handleDrawingCircle = (e) => {
 };
 
 const handleDrawingRect = (e) => {
-	console.log('in drawing rect');
 	const x = e.clientX;
 	const y = e.clientY;
 
-	const width = x - startingX;
-	const height = y - startingY;
+	let top = pointsData.pop();
+	redrawPoints();
+
+	const startX = top.innerPoints[0].xPos;
+	const startY = top.innerPoints[0].yPos;
+
+	const width = x - startX;
+	const height = y - startY;
 
 	ctx.lineWidth = 5;
 	ctx.lineCap = 'round';
 
 	ctx.beginPath();
-	ctx.rect(startingX, startingY, width, height);
+	ctx.rect(startX, startY, width, height);
 	ctx.stroke();
+
+	// let innerPoints = top.innerPoints;
+	let newInnerPoints = addRectanglePoints(startX, startY, width, height);
+	top = {
+		...top,
+		innerPoints: newInnerPoints,
+	};
+
+	pointsData.push(top);
+};
+
+const addRectanglePoints = (startX, startY, width, height) => {
+	//insert points from top left -> top right -> bottom right -> bottom left -> top left
+	let innerPoints = [];
+	innerPoints.push({
+		xPos: startX,
+		yPos: startY,
+	});
+	innerPoints.push({
+		xPos: startX + width,
+		yPos: startY,
+	});
+	innerPoints.push({
+		xPos: startX + width,
+		yPos: startY + height,
+	});
+	innerPoints.push({
+		xPos: startX,
+		yPos: startY + height,
+	});
+	innerPoints.push({
+		xPos: startX,
+		yPos: startY,
+	});
+
+	return innerPoints;
 };
 
 canvas.addEventListener('mousemove', (e) => {
@@ -179,6 +211,7 @@ canvas.addEventListener('mousedown', (e) => {
 
 	ctx.beginPath();
 	ctx.moveTo(e.clientX, e.clientY);
+	console.log('MOUSE DOWN')
 
 	switch (currentDrawingState) {
 		case isDrawingCircle:
@@ -186,15 +219,27 @@ canvas.addEventListener('mousedown', (e) => {
 			startingY = e.clientY;
 			break;
 		case isDrawingRect:
-			startingX = e.clientX;
-			startingY = e.clientY;
+			// startingX = e.clientX;
+			// startingY = e.clientY;
+			pointsData.push({
+				innerPoints: [
+					{
+						xPos: e.clientX,
+						yPos: e.clientY,
+					},
+				],
+				type: 'rectangle',
+				color: selectedColor,
+			});
 			break;
 		case isFreeDrawing:
 			pointsData.push({
-				innerPoints: [{
-					xPos: e.clientX,
-					yPos: e.clientY
-				}],
+				innerPoints: [
+					{
+						xPos: e.clientX,
+						yPos: e.clientY,
+					},
+				],
 				type: 'free-draw',
 				color: selectedColor,
 			});
@@ -206,7 +251,7 @@ canvas.addEventListener('mousedown', (e) => {
 canvas.addEventListener('mouseup', (e) => {
 	isPainting = false;
 
-	console.log(pointsData);
+	//console.log(pointsData);
 
 	const {isFreeDrawing, isDrawingCircle, isDrawingRect} = drawingStates;
 
@@ -255,15 +300,7 @@ const redrawPoints = () => {
 			ctx.moveTo(currPoint.xPos, currPoint.yPos);
 			ctx.lineTo(nextPoint.xPos, nextPoint.yPos);
 			ctx.stroke();
-
-			// ctx.lineTo(currPoint.xPos, currPoint.yPos);
-			// ctx.stroke();
-			// ctx.beginPath();
-			// ctx.moveTo(innerPoints[0].startX, innerPoints[0].startY);
 		}
-
-		//resets the path to avoid drawing the last stroke upon calling ctx.stroke() again
-		//ctx.beginPath();
 	}
 };
 
@@ -278,8 +315,6 @@ const run = () => {
 	console.log('in run');
 	canvas.width = window.innerWidth;
 	canvas.height = window.innerHeight;
-
-	
 };
 
 window.addEventListener('load', () => {
