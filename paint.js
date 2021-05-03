@@ -29,7 +29,7 @@ let startingX,
 	currentX = 0,
 	currentY = 0;
 let offsetX = canvas.offsetLeft;
-let offsetY = canvas.offsetHeight;
+let offsetY = 4;
 
 var pointsData = [];
 
@@ -116,8 +116,8 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 });
 
 const handleFreeDraw = (e) => {
-	const x = e.clientX;
-	const y = e.clientY;
+	const x = e.clientX - offsetX;
+	const y = e.clientY + offsetY;
 
 	ctx.lineTo(x, y);
 	ctx.stroke();
@@ -139,7 +139,7 @@ const handleFreeDraw = (e) => {
 };
 
 const handleDrawingCircle = (e) => {
-	const x = e.clientX;
+	const x = e.clientX - offsetX;
 	const y = e.clientY;
 
 	let top = pointsData.pop();
@@ -195,7 +195,7 @@ const handleDrawingCircle = (e) => {
 */
 
 const handleDrawingRect = (e) => {
-	const x = e.clientX;
+	const x = e.clientX - offsetX;
 	const y = e.clientY;
 
 	let top = pointsData.pop();
@@ -251,7 +251,16 @@ const getRectanglePoints = (startX, startY, width, height) => {
 	return innerPoints;
 };
 
+document.addEventListener('mousemove', (e) => {
+	let cursor = document.querySelector('.custom-cursor');
+	if(e.pageX < canvas.width && e.pageY < canvas.height){
+	cursor.setAttribute('style', `top: ${e.pageY - 4}px;left:${e.pageX - 4}px`);
+	}
+})
+
+
 canvas.addEventListener('mousemove', (e) => {
+	console.log('in tge canvas one');
 	if (!isPainting) return;
 
 	const {isFreeDrawing, isDrawingCircle, isDrawingRect} = drawingStates;
@@ -282,7 +291,7 @@ canvas.addEventListener('mousedown', (e) => {
 	const {isFreeDrawing, isDrawingCircle, isDrawingRect} = drawingStates;
 
 	ctx.beginPath();
-	ctx.moveTo(e.clientX, e.clientY);
+	ctx.moveTo(e.clientX - offsetX, e.clientY);
 	console.log('MOUSE DOWN');
 
 	switch (currentDrawingState) {
@@ -290,7 +299,7 @@ canvas.addEventListener('mousedown', (e) => {
 			pointsData.push({
 				innerPoints: [
 					{
-						xPos: e.clientX,
+						xPos: e.clientX - offsetX,
 						yPos: e.clientY,
 					},
 				],
@@ -299,12 +308,10 @@ canvas.addEventListener('mousedown', (e) => {
 			});
 			break;
 		case isDrawingRect:
-			// startingX = e.clientX;
-			// startingY = e.clientY;
 			pointsData.push({
 				innerPoints: [
 					{
-						xPos: e.clientX,
+						xPos: e.clientX - offsetX,
 						yPos: e.clientY,
 					},
 				],
@@ -316,7 +323,7 @@ canvas.addEventListener('mousedown', (e) => {
 			pointsData.push({
 				innerPoints: [
 					{
-						xPos: e.clientX,
+						xPos: e.clientX - offsetX,
 						yPos: e.clientY,
 					},
 				],
@@ -403,8 +410,9 @@ const redrawPoints = () => {
 
 const run = () => {
 	console.log('in run');
-	canvas.width = window.innerWidth;
+	canvas.width = window.innerWidth - offsetX;
 	canvas.height = window.innerHeight;
+	canvas.offsetWidth = offsetX;
 };
 
 window.addEventListener('load', () => {
