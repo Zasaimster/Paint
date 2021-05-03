@@ -1,3 +1,5 @@
+const sizeSlider = document.getElementById('size-slider')
+
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
@@ -20,6 +22,8 @@ const drawingStates = {
 let currentDrawingState = drawingStates.isFreeDrawing;
 let selectedColor = colors.default;
 let eraserColor = colors.background;
+let penThickness = 5;
+
 let startingX,
 	startingY,
 	endingX,
@@ -29,7 +33,7 @@ let startingX,
 	currentX = 0,
 	currentY = 0;
 let offsetX = canvas.offsetLeft;
-let offsetY = 4;
+let offsetY = 0;
 
 var pointsData = [];
 
@@ -115,6 +119,28 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 	});
 });
 
+sizeSlider.addEventListener('input', () => {
+	console.log('in input')
+	penThickness = sizeSlider.value;
+	ctx.lineWidth = penThickness;
+	console.log(ctx.lineWidth)
+
+	document.getElementById('range').firstChild.data = "Cursor Size: " + penThickness + "px"
+
+	let pen = document.querySelector('circle');
+	console.log(pen)
+	pen.setAttribute('cx', 0)
+	pen.setAttribute('cy', 0);
+	pen.setAttribute('r', penThickness/2);
+	console.log(pen)
+
+	document.querySelector('svg').setAttribute('width', penThickness * 5);
+	document.querySelector('svg').setAttribute('height', penThickness * 5);
+
+
+})
+
+
 const handleFreeDraw = (e) => {
 	const x = e.clientX - offsetX;
 	const y = e.clientY + offsetY;
@@ -154,7 +180,7 @@ const handleDrawingCircle = (e) => {
 	const cX = (x - startX) / 2 + startX;
 	const cY = (y - startY) / 2 + startY;
 
-	ctx.lineWidth = 5;
+	//ctx.lineWidth = 5;
 	ctx.lineCap = 'round';
 
 	ctx.beginPath();
@@ -207,7 +233,7 @@ const handleDrawingRect = (e) => {
 	const width = x - startX;
 	const height = y - startY;
 
-	ctx.lineWidth = 5;
+	//ctx.lineWidth = 5;
 	ctx.lineCap = 'round';
 
 	ctx.beginPath();
@@ -252,20 +278,19 @@ const getRectanglePoints = (startX, startY, width, height) => {
 };
 
 document.addEventListener('mousemove', (e) => {
-	let cursor = document.querySelector('.custom-cursor');
+	let cursor = document.querySelector('.custom-cursor #pen-cursor');
 	if(e.pageX < canvas.width && e.pageY < canvas.height){
-	cursor.setAttribute('style', `top: ${e.pageY - 4}px;left:${e.pageX - 4}px`);
+		cursor.setAttribute('style', `top: ${e.pageY - penThickness}px;left:${e.pageX - penThickness}px`);
 	}
 })
 
 
 canvas.addEventListener('mousemove', (e) => {
-	console.log('in tge canvas one');
 	if (!isPainting) return;
 
 	const {isFreeDrawing, isDrawingCircle, isDrawingRect} = drawingStates;
 
-	ctx.lineWidth = 5;
+	ctx.lineWidth = penThickness;
 	ctx.lineCap = 'round';
 
 	ctx.strokeStyle = selectedColor;

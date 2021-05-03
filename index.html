@@ -1,52 +1,87 @@
-<!doctype html>
+<!DOCTYPE html>
 
 <html lang="en">
-<head>
-  <meta charset="utf-8">
+	<head>
+		<meta charset="utf-8" />
 
-  <title>Paint Application</title>
-  <meta name="author" content="Saim Ahmad">
+		<title>Paint Application</title>
+		<meta name="author" content="Saim Ahmad" />
 
-  <link rel="stylesheet" href="./paint.css">
+		<link rel="stylesheet" href="./paint.css" />
+	</head>
 
-</head>
+	<body>
+		<div class="custom-cursor">
+			<div id="pen-cursor">
+				<svg width="20px" height="20px" viewbox="-21 -21 100 100">
+					<circle
+						cx="0"
+						cy="0"
+						r="5"
+						stroke-width="1"
+						stroke="black"
+						fill="none"
+					/>
+				</svg>
+			</div>
+		</div>
+		<div class="side-bar">
+			<div class="color-bar">
+				<p id="rgb-color-value">RGB: 0 0 0</p>
+				<p id="hex-color-value">Hexadecimal : #000000</p>
+			</div>
+			<br />
+			<div class="colors">
+				<input
+					type="button"
+					style="background-color: black"
+					id="black-brush"
+					class="color-selector"
+				/>
+				<input
+					type="button"
+					style="background-color: red"
+					id="red-brush"
+					class="color-selector"
+				/>
+				<input
+					type="button"
+					style="background-color: green"
+					id="green-brush"
+					class="color-selector"
+				/>
+				<input
+					type="button"
+					style="background-color: blue"
+					id="blue-brush"
+					class="color-selector"
+				/>
+			</div>
 
-<body>
-        <div class="custom-cursor">
-            <div id="pen-cursor">
-                <svg height="8" width="8">
-                    <circle cx="4" cy="4" r="4" stroke-width="0.5" stroke="black" fill="none" />
-                </svg>
-            </div>
-
-        </div>
-        <div class="side-bar">
-            <div class="color-bar">
-                <p id="rgb-color-value"> RGB: 0 0 0 </p>
-                <p id="hex-color-value"> Hexadecimal : #000000 </p>
-            </div>
-            <br />
-            <div class="range">
-                Cursor Size
-                <br>
-                <input type="range" min="1" max ="20" value="5" class="size-slider" />
-            </div>
-            <div class="colors">
-                <input type="button" style="background-color: black" id="black-brush" class="color-selector" />
-                <input type="button" style="background-color: red" id="red-brush" class="color-selector" />
-                <input type="button" style="background-color: green" id="green-brush" class="color-selector" />
-                <input type="button" style="background-color: blue" id="blue-brush" class="color-selector" />
-            </div>
-
-            <div class="buttons">
-                <button class="utility-button" id="eraser"> Eraser </button>
-                <button class="utility-button" id="undo" > Undo </button>
-                <button class="utility-button" id="circle" > Create Circle </button>
-                <button class="utility-button" id="rect" > Create rectangle </button>
-                <button class="utility-button" id="free-draw" > free draw </button>
-            </div>
-        </div>
-    <canvas id="canvas"></canvas>
-  <script src="./paint.js"></script>
-</body>
+			<div class="buttons">
+				<div id="range">
+					Cursor Size: 5px
+					<br />
+					<input
+						type="range"
+						min="4"
+						max="20"
+						value="5"
+						id="size-slider"
+					/>
+				</div>
+				<button class="utility-button" id="eraser">Eraser</button>
+				<button class="utility-button" id="undo">Undo</button>
+				<button class="utility-button" id="circle">
+					Create Circle
+				</button>
+				<button class="utility-button" id="rect">
+					Create rectangle
+				</button>
+				<button class="utility-button" id="free-draw">free draw</button>
+			</div>
+		</div>
+		<canvas id="canvas"></canvas>
+		<script src="./paint.js"></script>
+	</body>
 </html>
