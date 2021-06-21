@@ -17,10 +17,12 @@ const drawingStates = {
 	isFreeDrawing: 'isFreeDrawing',
 	isDrawingCircle: 'isDrawingCircle',
 	isDrawingRect: 'isDrawingRect',
+	isErasing: 'isErasing'
 };
 
 let currentDrawingState = drawingStates.isFreeDrawing;
 let selectedColor = colors.default;
+let lastSelectedColor = colors.default;
 let eraserColor = colors.background;
 let penThickness = 5;
 
@@ -63,8 +65,6 @@ const convertColorToRGB = (color) => {
 	for(let i = 0, colorIndex = 1; i < 3; i++, colorIndex += 2) {
 		rgb[i] = 16 * getNumberForHexCharacter(color.charAt(colorIndex)) + getNumberForHexCharacter(color.charAt(colorIndex + 1));
 	}
-	console.log('Current RGB colors:', rgb[0], rgb[1], rgb[2])
-
 
 	return rgb[0].toString() + " " + rgb[1].toString() + " " + rgb[2].toString();
 }
@@ -75,7 +75,6 @@ document.querySelectorAll('.color-selector').forEach((colorSelector) => {
 		switch (colorSelector.id) {
 			case 'black-brush':
 				selectedColor = colors.default;
-				console.log('selecing black');
 				break;
 			case 'red-brush':
 				selectedColor = colors.red;
@@ -89,6 +88,9 @@ document.querySelectorAll('.color-selector').forEach((colorSelector) => {
 			default:
 				break;
 		}
+		if(currentDrawingState === drawingStates.isErasing){
+			currentDrawingState = drawingStates.isFreeDrawing
+		}
 		document.getElementById('rgb-color-value').innerHTML =  'RGB: ' + convertColorToRGB(selectedColor);
 		document.getElementById('hex-color-value').innerHTML =  'Hexadecimal: ' + selectedColor;
 	});
@@ -98,15 +100,23 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 	utilityButton.addEventListener('click', () => {
 		switch (utilityButton.id) {
 			case 'eraser':
+				lastSelectedColor = selectedColor;
 				selectedColor = colors.background;
+				currentDrawingState = drawingStates.isErasing;
 				break;
 			case 'undo':
 				handleUndo();
 				break;
 			case 'circle':
+				if(currentDrawingState === drawingStates.isErasing) {
+					selectedColor = lastSelectedColor;
+				}
 				currentDrawingState = drawingStates.isDrawingCircle;
 				break;
 			case 'rect':
+				if(currentDrawingState === drawingStates.isErasing) {
+					selectedColor = lastSelectedColor;
+				}
 				currentDrawingState = drawingStates.isDrawingRect;
 				break;
 			case 'free-draw':
@@ -121,18 +131,16 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 
 sizeSlider.addEventListener('input', () => {
 	console.log('in input')
-	penThickness = sizeSlider.value;
+	penThickness = parseInt(sizeSlider.value);
 	ctx.lineWidth = penThickness;
-	console.log(ctx.lineWidth)
 
 	document.getElementById('range').firstChild.data = "Cursor Size: " + penThickness + "px"
 
 	let pen = document.querySelector('circle');
-	console.log(pen)
+
 	pen.setAttribute('cx', 0)
 	pen.setAttribute('cy', 0);
 	pen.setAttribute('r', penThickness/2);
-	console.log(pen)
 
 	document.querySelector('svg').setAttribute('width', penThickness * 5);
 	document.querySelector('svg').setAttribute('height', penThickness * 5);
@@ -180,9 +188,11 @@ const handleDrawingCircle = (e) => {
 	const cX = (x - startX) / 2 + startX;
 	const cY = (y - startY) / 2 + startY;
 
-	//ctx.lineWidth = 5;
+	ctx.lineWidth = penThickness;
 	ctx.lineCap = 'round';
 
+	ctx.strokeStyle = selectedColor;
+	
 	ctx.beginPath();
 	ctx.ellipse(cX, cY, xRadius, yRadius, 0, 0, 2 * Math.PI);
 	ctx.stroke();
@@ -233,8 +243,10 @@ const handleDrawingRect = (e) => {
 	const width = x - startX;
 	const height = y - startY;
 
-	//ctx.lineWidth = 5;
+	ctx.lineWidth = penThickness;
 	ctx.lineCap = 'round';
+
+	ctx.strokeStyle = selectedColor;
 
 	ctx.beginPath();
 	ctx.rect(startX, startY, width, height);
@@ -279,23 +291,45 @@ const getRectanglePoints = (startX, startY, width, height) => {
 
 document.addEventListener('mousemove', (e) => {
 	let cursor = document.querySelector('.custom-cursor #pen-cursor');
-	if(e.pageX < canvas.width && e.pageY < canvas.height){
+	let circle = cursor.children[0].children[0]
+
+	if(e.pageX > offsetX + penThickness/2){
+		cursor.setAttribute('style', 'visibility: visible');
+
 		cursor.setAttribute('style', `top: ${e.pageY - penThickness}px;left:${e.pageX - penThickness}px`);
+		let strokeColor = currentDrawingState === drawingStates.isErasing ? '#ff66e5' : 'black'
+		circle.setAttribute('stroke', strokeColor)
+
+		canvasMouseMove(e);
+
+	} else {
+		cursor.setAttribute('style', 'visibility: hidden')
 	}
 })
 
+document.addEventListener('mousedown', (e) => {
+	if(e.pageX > offsetX + penThickness/2) {
+		e.preventDefault();
+		canvasMouseDown(e);
+	}
+})
 
-canvas.addEventListener('mousemove', (e) => {
+document.addEventListener('mouseup', (e) => {
+	if (e.pageX > offsetX + penThickness / 2) {
+		e.preventDefault();
+		canvasMouseUp(e);
+	}
+});
+
+const canvasMouseMove = e => {
 	if (!isPainting) return;
 
-	const {isFreeDrawing, isDrawingCircle, isDrawingRect} = drawingStates;
+	const {isFreeDrawing, isDrawingCircle, isDrawingRect, isErasing} =
+		drawingStates;
 
-	ctx.lineWidth = penThickness;
-	ctx.lineCap = 'round';
-
-	ctx.strokeStyle = selectedColor;
 
 	switch (currentDrawingState) {
+		case isErasing:
 		case isFreeDrawing:
 			handleFreeDraw(e);
 			break;
@@ -308,12 +342,19 @@ canvas.addEventListener('mousemove', (e) => {
 		default:
 			break;
 	}
-});
+}
 
-canvas.addEventListener('mousedown', (e) => {
+const canvasMouseDown = e => {
 	isPainting = true;
 
-	const {isFreeDrawing, isDrawingCircle, isDrawingRect} = drawingStates;
+	const {isFreeDrawing, isDrawingCircle, isDrawingRect, isErasing} =
+		drawingStates;
+
+
+	ctx.lineWidth = penThickness;
+	ctx.lineCap = 'round';
+
+	ctx.strokeStyle = selectedColor;
 
 	ctx.beginPath();
 	ctx.moveTo(e.clientX - offsetX, e.clientY);
@@ -330,6 +371,8 @@ canvas.addEventListener('mousedown', (e) => {
 				],
 				type: 'ellipse',
 				color: selectedColor,
+				width: penThickness
+
 			});
 			break;
 		case isDrawingRect:
@@ -342,8 +385,10 @@ canvas.addEventListener('mousedown', (e) => {
 				],
 				type: 'rectangle',
 				color: selectedColor,
+				width: penThickness,
 			});
 			break;
+		case isErasing:
 		case isFreeDrawing:
 			pointsData.push({
 				innerPoints: [
@@ -354,13 +399,14 @@ canvas.addEventListener('mousedown', (e) => {
 				],
 				type: 'free-draw',
 				color: selectedColor,
+				width: penThickness,
 			});
 		default:
 			break;
 	}
-});
+}
 
-canvas.addEventListener('mouseup', (e) => {
+const canvasMouseUp = e => {
 	isPainting = false;
 
 	//console.log(pointsData);
@@ -381,15 +427,15 @@ canvas.addEventListener('mouseup', (e) => {
 		default:
 			break;
 	}
-});
+}
 
 const handleUndo = () => {
-	console.log('before: ', pointsData);
+	//console.log('before: ', pointsData);
 	pointsData.pop();
 
 	redrawPoints();
 
-	console.log('after: ', pointsData);
+	//console.log('after: ', pointsData);
 };
 
 const redrawPoints = () => {
@@ -403,6 +449,7 @@ const redrawPoints = () => {
 		let point = pointsData[i];
 		let innerPoints = pointsData[i].innerPoints;
 		ctx.strokeStyle = point.color;
+		ctx.lineWidth = point.width;
 
 		var j = point.type === 'ellipse' ? 1 : 0;
 		
