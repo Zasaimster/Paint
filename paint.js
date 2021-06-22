@@ -1,4 +1,5 @@
 const sizeSlider = document.getElementById('size-slider')
+const hexInput = document.getElementById('hex-code-input')
 
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
@@ -6,9 +7,9 @@ var ctx = canvas.getContext('2d');
 const colors = {
 	default: '#000000',
 	background: '#ffffff',
-	red: '#fc0303',
-	green: '#00ff4c',
-	blue: '#008cff',
+	red: '#ff5959',
+	green: '#1cd446',
+	blue: '#0080c4',
 };
 
 let isPainting = false;
@@ -24,7 +25,7 @@ let currentDrawingState = drawingStates.isFreeDrawing;
 let selectedColor = colors.default;
 let lastSelectedColor = colors.default;
 let eraserColor = colors.background;
-let penThickness = 5;
+let penThickness = 10;
 
 let startingX,
 	startingY,
@@ -40,9 +41,13 @@ let offsetY = 0;
 var pointsData = [];
 
 const getNumberForHexCharacter = (val) => {
+	console.log(val)
+	console.log(!isNaN(parseInt(val)))
+	let x = parseInt(val)
+	if(x >= 0 && x <= 9) {
+		return x;
+	}
 	switch (val) {
-		case !isNaN(parseInt(val)):
-			return parseInt(val);
 		case 'a':
 			return 10;
 		case 'b':
@@ -56,17 +61,25 @@ const getNumberForHexCharacter = (val) => {
 		case 'f':
 			return 15;
 		default:
-			return 0;
+			return -1;
 	}
 }
 
-const convertColorToRGB = (color) => {
+const convertColorToRGB = () => {
 	let rgb = [];
 	for(let i = 0, colorIndex = 1; i < 3; i++, colorIndex += 2) {
 		rgb[i] = 16 * getNumberForHexCharacter(color.charAt(colorIndex)) + getNumberForHexCharacter(color.charAt(colorIndex + 1));
 	}
 
 	return rgb[0].toString() + " " + rgb[1].toString() + " " + rgb[2].toString();
+}
+
+const setRgbHexValues = (color) => {
+	document.getElementById('rgb-color-value').innerHTML = 'RGB: ';
+	document.getElementById('rgb-color-value').insertAdjacentHTML('beforeend', `<b>${convertColorToRGB(selectedColor)}</b>`)
+
+	document.getElementById('hex-color-value').innerHTML =  'Hex: ';
+	document.getElementById('hex-color-value').insertAdjacentHTML('beforeend', `<b>${selectedColor}</b>`)
 }
 
 document.querySelectorAll('.color-selector').forEach((colorSelector) => {
@@ -91,10 +104,21 @@ document.querySelectorAll('.color-selector').forEach((colorSelector) => {
 		if(currentDrawingState === drawingStates.isErasing){
 			currentDrawingState = drawingStates.isFreeDrawing
 		}
-		document.getElementById('rgb-color-value').innerHTML =  'RGB: ' + convertColorToRGB(selectedColor);
-		document.getElementById('hex-color-value').innerHTML =  'Hexadecimal: ' + selectedColor;
+		setRgbHexValues()
 	});
 });
+
+const setButtonColor = (type) => {
+	if(type === 'undo') {
+		return;
+	}
+	let allInputs = document.getElementsByClassName('utility-button');
+	for(let input of allInputs){
+		input.setAttribute('style', 'border: 2px solid #2b2b2b')
+		console.log(input)
+	}
+	document.getElementById(type).setAttribute('style', 'border: 2px solid #007ee0');
+}
 
 document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 	utilityButton.addEventListener('click', () => {
@@ -103,25 +127,30 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 				lastSelectedColor = selectedColor;
 				selectedColor = colors.background;
 				currentDrawingState = drawingStates.isErasing;
+				setButtonColor('eraser');
 				break;
 			case 'undo':
 				handleUndo();
+				setButtonColor('undo');
 				break;
 			case 'circle':
 				if(currentDrawingState === drawingStates.isErasing) {
 					selectedColor = lastSelectedColor;
 				}
 				currentDrawingState = drawingStates.isDrawingCircle;
+				setButtonColor('circle');
 				break;
 			case 'rect':
 				if(currentDrawingState === drawingStates.isErasing) {
 					selectedColor = lastSelectedColor;
 				}
 				currentDrawingState = drawingStates.isDrawingRect;
+				setButtonColor('rect');
 				break;
 			case 'free-draw':
+				selectedColor = currentDrawingState === drawingStates.isErasing ? lastSelectedColor : selectedColor;
 				currentDrawingState = drawingStates.isFreeDrawing;
-				selectedColor = colors.default;
+				setButtonColor('free-draw');
 				break;
 			default:
 				break;
@@ -134,7 +163,7 @@ sizeSlider.addEventListener('input', () => {
 	penThickness = parseInt(sizeSlider.value);
 	ctx.lineWidth = penThickness;
 
-	document.getElementById('range').firstChild.data = "Cursor Size: " + penThickness + "px"
+	document.getElementById('range-text').firstChild.data = "Pen Size: " + penThickness
 
 	let pen = document.querySelector('circle');
 
@@ -142,11 +171,34 @@ sizeSlider.addEventListener('input', () => {
 	pen.setAttribute('cy', 0);
 	pen.setAttribute('r', penThickness/2);
 
+	console.log(penThickness)
 	document.querySelector('svg').setAttribute('width', penThickness * 5);
 	document.querySelector('svg').setAttribute('height', penThickness * 5);
-
-
 })
+
+hexInput.addEventListener('keypress', (e) => {
+	if(e.key == "Enter") {
+		let val = hexInput.value;
+		if(val.length != 6) {
+			alert('Please enter a 6 character long hex value')
+			hexInput.value = ""
+			return;
+		}
+		for(let i = 0; i < 6; i++) {
+			if(getNumberForHexCharacter(val.charAt(i)) == -1) {
+				console.log(getNumberForHexCharacter(val.charAt(i)))
+				alert('Please enter a valid hex value that contains only digits 0-9 or letters a-f')
+				hexInput.value = ""
+				return;
+			}
+		}
+
+		selectedColor = '#' + hexInput.value;
+		setRgbHexValues()
+		hexInput.value = ""
+	}
+})
+
 
 
 const handleFreeDraw = (e) => {

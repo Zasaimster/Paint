@@ -13,7 +13,7 @@
 	<body>
 		<div class="custom-cursor">
 			<div id="pen-cursor">
-				<svg width="20px" height="20px" viewbox="-21 -21 100 100">
+				<svg width="50" height="50" viewbox="-21 -21 100 100">
 					<circle
 						cx="0"
 						cy="0"
@@ -29,8 +29,8 @@
 
 		<div class="side-bar">
 			<div class="color-bar">
-				<p id="rgb-color-value">RGB: 0 0 0</p>
-				<p id="hex-color-value">Hexadecimal : #000000</p>
+				<p id="rgb-color-value">RGB: <b>0 0 0 </b></p>
+				<p id="hex-color-value">Hex: <b> #000000 </b></p>
 			</div>
 			<br />
 			<div class="colors">
@@ -42,45 +42,49 @@
 				/>
 				<input
 					type="button"
-					style="background-color: red"
+					style="background-color: #ff5959"
 					id="red-brush"
 					class="color-selector"
 				/>
 				<input
 					type="button"
-					style="background-color: green"
+					style="background-color: #1cd446"
 					id="green-brush"
 					class="color-selector"
 				/>
 				<input
 					type="button"
-					style="background-color: blue"
+					style="background-color: #0080c4"
 					id="blue-brush"
 					class="color-selector"
 				/>
+				<div class="hex-code">
+					<p style="margin-bottom: 8px;"> Hex Value (no #) </p>
+					<input 
+						type="text"
+						id="hex-code-input"
+						placeholder=""
+					/>
+				</div>
 			</div>
 
 			<div class="buttons">
-				<div id="range">
-					Cursor Size: 5px
+				<div class="range">
+					<p style="margin-bottom: -10px; color: white;" id="range-text">Pen Size: 10 </p>
 					<br />
 					<input
 						type="range"
-						min="4"
+						min="5"
 						max="20"
-						value="5"
+						value="10"
 						id="size-slider"
 					/>
 				</div>
-				<button class="utility-button" id="eraser">Eraser</button>
-				<button class="utility-button" id="undo">Undo</button>
-				<button class="utility-button" id="circle">
-					Create Circle
-				</button>
-				<button class="utility-button" id="rect">
-					Create rectangle
-				</button>
-				<button class="utility-button" id="free-draw">free draw</button>
+					<input type="image" src="images/pen.png" class="utility-button" id="free-draw" />
+					<input type="image" src="images/eraser.png" class="utility-button" id="eraser" />
+					<input type="image" src="images/undo.png" class="utility-button" id="undo" />
+					<input type="image" src="images/circle.png" class="utility-button" id="circle" />
+					<input type="image" src="images/rect.png" class="utility-button" id="rect" />
 			</div>
 		</div>
 

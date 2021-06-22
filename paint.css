@@ -14,7 +14,16 @@
 
 .custom-cursor{
     position: absolute;
-    
+}
+
+.color-bar {
+    color: white;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-left: 10px;
+}
+
+.color-bar > p:nth-child(1) {
+    margin-bottom: 5px;
 }
 
 #pen-cursor{
@@ -36,28 +45,82 @@
 
     padding: 10px 0 0 10px;
 
-    background-color:lightgray;
+    background-color:#2b2b2b;
 }
 
-.range {
-    margin-bottom: 10px;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    letter-spacing: 2px;
-}
 
 .colors {
     display: grid;
     grid-template-columns: 40% 50%;
-    margin-left: 10px;
+    
 }
 
 .color-selector {
     width: 40px;
     height: 40px;
-    margin: 2px 2px 7px 2px;
+    
+    margin-top: 12px;
+
     border-radius: 20px;
+
+    border: 2px white solid;
+
+}
+
+.color-selector:hover{
+    border-color: #00a4ff;
+    transition: 85ms;
+}
+
+.hex-code{
+    margin: 14px 0 0 10px;
+    color: white;
+    grid-column: 1/3;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    letter-spacing: 0.2px;
+}
+
+#hex-code-input {
+    width: 115px;
+}
+
+#hex-code-input:focus {
+    outline: none;
 }
 
 .buttons {
+    display: grid;
+    grid-template-columns: 40% 50%;
     margin-top: 10px;
 }
+
+.range {
+    margin: 5px 0 5px 10px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    letter-spacing: 0.5px;
+
+    grid-column: 1/3;
+}
+
+.utility-button {
+    background: #ADC6D9;
+    border-radius: 50%;
+    padding: 4px;
+    margin-top: 12px;
+    
+    border: 2px solid #2b2b2b;
+}
+
+.utility-button:nth-of-type(1){
+    border: 2px solid #007ee0;
+}
+
+.utility-button:hover {
+    background: #89b6d9;
+    transition: 85ms;
+}
+
+#size-slider{
+    width: 120px;
+}
+
