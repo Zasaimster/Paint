@@ -438,6 +438,9 @@ const canvasMouseDown = e => {
 			break;
 		case isErasing:
 		case isFreeDrawing:
+			ctx.lineTo(e.clientX - offsetX, e.clientY);
+			ctx.stroke();
+
 			pointsData.push({
 				innerPoints: [
 					{
@@ -509,9 +512,14 @@ const redrawPoints = () => {
 			continue;
 		}
 
-		for (j; j < innerPoints.length - 1; j++) {
+		for (j; j < innerPoints.length; j++) {
 			let currPoint = innerPoints[j];
 			let nextPoint = innerPoints[j + 1];
+
+			//in case array size is just 1 (indicates a single "dot" on the canvas)
+			if(nextPoint === undefined) {
+				nextPoint = currPoint
+			}
 
 			ctx.beginPath();
 			ctx.moveTo(currPoint.xPos, currPoint.yPos);
