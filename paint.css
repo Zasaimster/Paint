@@ -28,7 +28,7 @@
 
 #pen-cursor{
     position: absolute;
-    z-index: 1;
+    z-index: 10;
     cursor: none;
 }
 
@@ -46,6 +46,13 @@
     padding: 10px 0 0 10px;
 
     background-color:#2b2b2b;
+}
+
+#color-indicator {
+    z-index: 5;
+    fill: black;
+    stroke-width: 2px;
+    stroke: white;
 }
 
 

@@ -41,8 +41,6 @@ let offsetY = 0;
 var pointsData = [];
 
 const getNumberForHexCharacter = (val) => {
-	console.log(val)
-	console.log(!isNaN(parseInt(val)))
 	let x = parseInt(val)
 	if(x >= 0 && x <= 9) {
 		return x;
@@ -65,7 +63,7 @@ const getNumberForHexCharacter = (val) => {
 	}
 }
 
-const convertColorToRGB = () => {
+const convertColorToRGB = (color) => {
 	let rgb = [];
 	for(let i = 0, colorIndex = 1; i < 3; i++, colorIndex += 2) {
 		rgb[i] = 16 * getNumberForHexCharacter(color.charAt(colorIndex)) + getNumberForHexCharacter(color.charAt(colorIndex + 1));
@@ -74,16 +72,17 @@ const convertColorToRGB = () => {
 	return rgb[0].toString() + " " + rgb[1].toString() + " " + rgb[2].toString();
 }
 
-const setRgbHexValues = (color) => {
+const setRgbHexValues = () => {
 	document.getElementById('rgb-color-value').innerHTML = 'RGB: ';
 	document.getElementById('rgb-color-value').insertAdjacentHTML('beforeend', `<b>${convertColorToRGB(selectedColor)}</b>`)
 
 	document.getElementById('hex-color-value').innerHTML =  'Hex: ';
 	document.getElementById('hex-color-value').insertAdjacentHTML('beforeend', `<b>${selectedColor}</b>`)
+
+	document.getElementById('color-indicator').setAttribute('style', `fill: ${selectedColor}`)
 }
 
 document.querySelectorAll('.color-selector').forEach((colorSelector) => {
-	console.log('in query selcetor');
 	colorSelector.addEventListener('click', () => {
 		switch (colorSelector.id) {
 			case 'black-brush':
@@ -115,7 +114,6 @@ const setButtonColor = (type) => {
 	let allInputs = document.getElementsByClassName('utility-button');
 	for(let input of allInputs){
 		input.setAttribute('style', 'border: 2px solid #2b2b2b')
-		console.log(input)
 	}
 	document.getElementById(type).setAttribute('style', 'border: 2px solid #007ee0');
 }
@@ -159,7 +157,6 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 });
 
 sizeSlider.addEventListener('input', () => {
-	console.log('in input')
 	penThickness = parseInt(sizeSlider.value);
 	ctx.lineWidth = penThickness;
 
@@ -171,7 +168,6 @@ sizeSlider.addEventListener('input', () => {
 	pen.setAttribute('cy', 0);
 	pen.setAttribute('r', penThickness/2);
 
-	console.log(penThickness)
 	document.querySelector('svg').setAttribute('width', penThickness * 5);
 	document.querySelector('svg').setAttribute('height', penThickness * 5);
 })
@@ -186,7 +182,6 @@ hexInput.addEventListener('keypress', (e) => {
 		}
 		for(let i = 0; i < 6; i++) {
 			if(getNumberForHexCharacter(val.charAt(i)) == -1) {
-				console.log(getNumberForHexCharacter(val.charAt(i)))
 				alert('Please enter a valid hex value that contains only digits 0-9 or letters a-f')
 				hexInput.value = ""
 				return;
