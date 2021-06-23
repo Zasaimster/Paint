@@ -220,6 +220,7 @@ const handleFreeDraw = (e) => {
 };
 
 const handleDrawingCircle = (e) => {
+	console.log('in drawing circ')
 	const x = e.clientX - offsetX;
 	const y = e.clientY;
 
@@ -486,7 +487,7 @@ const handleUndo = () => {
 };
 
 const redrawPoints = () => {
-	ctx.clearRect(150, 0, canvas.width, canvas.height);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	if (pointsData.length === 0) {
 		return;
