@@ -1,5 +1,7 @@
 const sizeSlider = document.getElementById('size-slider')
 const hexInput = document.getElementById('hex-code-input')
+const downloadButton = document.getElementById('download-canvas')
+
 
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
@@ -192,6 +194,26 @@ hexInput.addEventListener('keypress', (e) => {
 		setRgbHexValues()
 		hexInput.value = ""
 	}
+})
+
+downloadButton.addEventListener('mousedown', (e) => {
+	//make a temp 'a' tag that will be used to download image
+	var temp = document.createElement('a')
+
+	var data = canvas.toDataURL('image/png');
+	temp.href = data
+
+	var date = new Date();
+	var calendarDate = date.getMonth() + 1 + '-' + date.getDate() + '-' + date.getFullYear();
+	var time = date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
+	temp.download = calendarDate + ' ' + time + '.png';
+
+	//temporarily add and delete the 'a' tag
+	document.body.appendChild(temp)
+	temp.click()
+	document.body.removeChild(temp)
+
+	e.preventDefault();
 })
 
 
