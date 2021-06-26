@@ -3,6 +3,11 @@
     padding: 0;
 }
 
+body {
+    overflow: hidden;
+}
+
+
 #canvas {
     position: absolute;
     left: 160px;

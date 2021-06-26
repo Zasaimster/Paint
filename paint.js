@@ -1,7 +1,6 @@
-const sizeSlider = document.getElementById('size-slider')
-const hexInput = document.getElementById('hex-code-input')
-const downloadButton = document.getElementById('download-canvas')
-
+const sizeSlider = document.getElementById('size-slider');
+const hexInput = document.getElementById('hex-code-input');
+const downloadButton = document.getElementById('download-canvas');
 
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
@@ -20,7 +19,7 @@ const drawingStates = {
 	isFreeDrawing: 'isFreeDrawing',
 	isDrawingCircle: 'isDrawingCircle',
 	isDrawingRect: 'isDrawingRect',
-	isErasing: 'isErasing'
+	isErasing: 'isErasing',
 };
 
 let currentDrawingState = drawingStates.isFreeDrawing;
@@ -43,46 +42,65 @@ let offsetY = 0;
 var pointsData = [];
 
 const getNumberForHexCharacter = (val) => {
-	let x = parseInt(val)
-	if(x >= 0 && x <= 9) {
+	let x = parseInt(val);
+	if (x >= 0 && x <= 9) {
 		return x;
 	}
 	switch (val) {
 		case 'a':
+		case 'A':
 			return 10;
 		case 'b':
+		case 'B':
 			return 11;
 		case 'c':
+		case 'C':
 			return 12;
 		case 'd':
+		case 'D':
 			return 13;
 		case 'e':
+		case 'E':
 			return 14;
 		case 'f':
+		case 'F':
 			return 15;
 		default:
 			return -1;
 	}
-}
+};
 
 const convertColorToRGB = (color) => {
 	let rgb = [];
-	for(let i = 0, colorIndex = 1; i < 3; i++, colorIndex += 2) {
-		rgb[i] = 16 * getNumberForHexCharacter(color.charAt(colorIndex)) + getNumberForHexCharacter(color.charAt(colorIndex + 1));
+	for (let i = 0, colorIndex = 1; i < 3; i++, colorIndex += 2) {
+		rgb[i] =
+			16 * getNumberForHexCharacter(color.charAt(colorIndex)) +
+			getNumberForHexCharacter(color.charAt(colorIndex + 1));
 	}
 
-	return rgb[0].toString() + " " + rgb[1].toString() + " " + rgb[2].toString();
-}
+	return (
+		rgb[0].toString() + ' ' + rgb[1].toString() + ' ' + rgb[2].toString()
+	);
+};
 
 const setRgbHexValues = () => {
 	document.getElementById('rgb-color-value').innerHTML = 'RGB: ';
-	document.getElementById('rgb-color-value').insertAdjacentHTML('beforeend', `<b>${convertColorToRGB(selectedColor)}</b>`)
+	document
+		.getElementById('rgb-color-value')
+		.insertAdjacentHTML(
+			'beforeend',
+			`<b>${convertColorToRGB(selectedColor)}</b>`
+		);
 
-	document.getElementById('hex-color-value').innerHTML =  'Hex: ';
-	document.getElementById('hex-color-value').insertAdjacentHTML('beforeend', `<b>${selectedColor}</b>`)
+	document.getElementById('hex-color-value').innerHTML = 'Hex: ';
+	document
+		.getElementById('hex-color-value')
+		.insertAdjacentHTML('beforeend', `<b>${selectedColor}</b>`);
 
-	document.getElementById('color-indicator').setAttribute('style', `fill: ${selectedColor}`)
-}
+	document
+		.getElementById('color-indicator')
+		.setAttribute('style', `fill: ${selectedColor}`);
+};
 
 document.querySelectorAll('.color-selector').forEach((colorSelector) => {
 	colorSelector.addEventListener('click', () => {
@@ -102,23 +120,25 @@ document.querySelectorAll('.color-selector').forEach((colorSelector) => {
 			default:
 				break;
 		}
-		if(currentDrawingState === drawingStates.isErasing){
-			currentDrawingState = drawingStates.isFreeDrawing
+		if (currentDrawingState === drawingStates.isErasing) {
+			currentDrawingState = drawingStates.isFreeDrawing;
 		}
-		setRgbHexValues()
+		setRgbHexValues();
 	});
 });
 
 const setButtonColor = (type) => {
-	if(type === 'undo') {
+	if (type === 'undo') {
 		return;
 	}
 	let allInputs = document.getElementsByClassName('utility-button');
-	for(let input of allInputs){
-		input.setAttribute('style', 'border: 2px solid #2b2b2b')
+	for (let input of allInputs) {
+		input.setAttribute('style', 'border: 2px solid #2b2b2b');
 	}
-	document.getElementById(type).setAttribute('style', 'border: 2px solid #007ee0');
-}
+	document
+		.getElementById(type)
+		.setAttribute('style', 'border: 2px solid #007ee0');
+};
 
 document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 	utilityButton.addEventListener('click', () => {
@@ -134,23 +154,29 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 				setButtonColor('undo');
 				break;
 			case 'circle':
-				if(currentDrawingState === drawingStates.isErasing) {
+				if (currentDrawingState === drawingStates.isErasing) {
 					selectedColor = lastSelectedColor;
 				}
 				currentDrawingState = drawingStates.isDrawingCircle;
 				setButtonColor('circle');
 				break;
 			case 'rect':
-				if(currentDrawingState === drawingStates.isErasing) {
+				if (currentDrawingState === drawingStates.isErasing) {
 					selectedColor = lastSelectedColor;
 				}
 				currentDrawingState = drawingStates.isDrawingRect;
 				setButtonColor('rect');
 				break;
 			case 'free-draw':
-				selectedColor = currentDrawingState === drawingStates.isErasing ? lastSelectedColor : selectedColor;
+				selectedColor =
+					currentDrawingState === drawingStates.isErasing
+						? lastSelectedColor
+						: selectedColor;
 				currentDrawingState = drawingStates.isFreeDrawing;
 				setButtonColor('free-draw');
+				break;
+			case 'delete':
+				resetCanvas();
 				break;
 			default:
 				break;
@@ -162,61 +188,64 @@ sizeSlider.addEventListener('input', () => {
 	penThickness = parseInt(sizeSlider.value);
 	ctx.lineWidth = penThickness;
 
-	document.getElementById('range-text').firstChild.data = "Pen Size: " + penThickness
+	document.getElementById('range-text').firstChild.data =
+		'Pen Size: ' + penThickness;
 
 	let pen = document.querySelector('circle');
 
-	pen.setAttribute('cx', 0)
+	pen.setAttribute('cx', 0);
 	pen.setAttribute('cy', 0);
-	pen.setAttribute('r', penThickness/2);
+	pen.setAttribute('r', penThickness / 2);
 
 	document.querySelector('svg').setAttribute('width', penThickness * 5);
 	document.querySelector('svg').setAttribute('height', penThickness * 5);
-})
+});
 
 hexInput.addEventListener('keypress', (e) => {
-	if(e.key == "Enter") {
+	if (e.key == 'Enter') {
 		let val = hexInput.value;
-		if(val.length != 6) {
-			alert('Please enter a 6 character long hex value')
-			hexInput.value = ""
+		if (val.length != 6) {
+			alert('Please enter a 6 character long hex value');
+			hexInput.value = '';
 			return;
 		}
-		for(let i = 0; i < 6; i++) {
-			if(getNumberForHexCharacter(val.charAt(i)) == -1) {
-				alert('Please enter a valid hex value that contains only digits 0-9 or letters a-f')
-				hexInput.value = ""
+		for (let i = 0; i < 6; i++) {
+			if (getNumberForHexCharacter(val.charAt(i)) == -1) {
+				alert(
+					'Please enter a valid hex value that contains only digits 0-9 or letters a-f'
+				);
+				hexInput.value = '';
 				return;
 			}
 		}
 
 		selectedColor = '#' + hexInput.value;
-		setRgbHexValues()
-		hexInput.value = ""
+		setRgbHexValues();
+		hexInput.value = '';
 	}
-})
+});
 
 downloadButton.addEventListener('mousedown', (e) => {
 	//make a temp 'a' tag that will be used to download image
-	var temp = document.createElement('a')
+	var temp = document.createElement('a');
 
 	var data = canvas.toDataURL('image/png');
-	temp.href = data
+	temp.href = data;
 
 	var date = new Date();
-	var calendarDate = date.getMonth() + 1 + '-' + date.getDate() + '-' + date.getFullYear();
-	var time = date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
+	var calendarDate =
+		date.getMonth() + 1 + '-' + date.getDate() + '-' + date.getFullYear();
+	var time =
+		date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
 	temp.download = calendarDate + ' ' + time + '.png';
 
 	//temporarily add and delete the 'a' tag
-	document.body.appendChild(temp)
-	temp.click()
-	document.body.removeChild(temp)
+	document.body.appendChild(temp);
+	temp.click();
+	document.body.removeChild(temp);
 
 	e.preventDefault();
-})
-
-
+});
 
 const handleFreeDraw = (e) => {
 	const x = e.clientX - offsetX;
@@ -242,7 +271,7 @@ const handleFreeDraw = (e) => {
 };
 
 const handleDrawingCircle = (e) => {
-	console.log('in drawing circ')
+	console.log('in drawing circ');
 	const x = e.clientX - offsetX;
 	const y = e.clientY;
 
@@ -262,7 +291,7 @@ const handleDrawingCircle = (e) => {
 	ctx.lineCap = 'round';
 
 	ctx.strokeStyle = selectedColor;
-	
+
 	ctx.beginPath();
 	ctx.ellipse(cX, cY, xRadius, yRadius, 0, 0, 2 * Math.PI);
 	ctx.stroke();
@@ -361,28 +390,38 @@ const getRectanglePoints = (startX, startY, width, height) => {
 
 document.addEventListener('mousemove', (e) => {
 	let cursor = document.querySelector('.custom-cursor #pen-cursor');
-	let circle = cursor.children[0].children[0]
+	let circle = cursor.children[0].children[0];
 
-	if(e.pageX > offsetX + penThickness/2){
+	if (
+		e.pageX > offsetX + penThickness / 2 &&
+		e.pageX < window.innerWidth &&
+		e.pageY < window.innerHeight
+	) {
 		cursor.setAttribute('style', 'visibility: visible');
 
-		cursor.setAttribute('style', `top: ${e.pageY - penThickness}px;left:${e.pageX - penThickness}px`);
-		let strokeColor = currentDrawingState === drawingStates.isErasing ? '#ff66e5' : 'black'
-		circle.setAttribute('stroke', strokeColor)
+		cursor.setAttribute(
+			'style',
+			`top: ${e.pageY - penThickness}px;left:${e.pageX - penThickness}px`
+		);
+		let strokeColor =
+			currentDrawingState === drawingStates.isErasing
+				? '#ff66e5'
+				: 'black';
+		circle.setAttribute('stroke', strokeColor);
 
 		canvasMouseMove(e);
-
 	} else {
-		cursor.setAttribute('style', 'visibility: hidden')
+		cursor.setAttribute('style', 'visibility: hidden');
+		isPainting = false;
 	}
-})
+});
 
 document.addEventListener('mousedown', (e) => {
-	if(e.pageX > offsetX + penThickness/2) {
+	if (e.pageX > offsetX + penThickness / 2) {
 		e.preventDefault();
 		canvasMouseDown(e);
 	}
-})
+});
 
 document.addEventListener('mouseup', (e) => {
 	if (e.pageX > offsetX + penThickness / 2) {
@@ -391,12 +430,11 @@ document.addEventListener('mouseup', (e) => {
 	}
 });
 
-const canvasMouseMove = e => {
+const canvasMouseMove = (e) => {
 	if (!isPainting) return;
 
 	const {isFreeDrawing, isDrawingCircle, isDrawingRect, isErasing} =
 		drawingStates;
-
 
 	switch (currentDrawingState) {
 		case isErasing:
@@ -412,14 +450,13 @@ const canvasMouseMove = e => {
 		default:
 			break;
 	}
-}
+};
 
-const canvasMouseDown = e => {
+const canvasMouseDown = (e) => {
 	isPainting = true;
 
 	const {isFreeDrawing, isDrawingCircle, isDrawingRect, isErasing} =
 		drawingStates;
-
 
 	ctx.lineWidth = penThickness;
 	ctx.lineCap = 'round';
@@ -441,8 +478,7 @@ const canvasMouseDown = e => {
 				],
 				type: 'ellipse',
 				color: selectedColor,
-				width: penThickness
-
+				width: penThickness,
 			});
 			break;
 		case isDrawingRect:
@@ -477,9 +513,9 @@ const canvasMouseDown = e => {
 		default:
 			break;
 	}
-}
+};
 
-const canvasMouseUp = e => {
+const canvasMouseUp = (e) => {
 	isPainting = false;
 
 	//console.log(pointsData);
@@ -500,7 +536,7 @@ const canvasMouseUp = e => {
 		default:
 			break;
 	}
-}
+};
 
 const handleUndo = () => {
 	//console.log('before: ', pointsData);
@@ -511,8 +547,10 @@ const handleUndo = () => {
 	//console.log('after: ', pointsData);
 };
 
+const resetCanvas = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+
 const redrawPoints = () => {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	resetCanvas();
 
 	if (pointsData.length === 0) {
 		return;
@@ -525,7 +563,7 @@ const redrawPoints = () => {
 		ctx.lineWidth = point.width;
 
 		var j = point.type === 'ellipse' ? 1 : 0;
-		
+
 		if (point.type === 'ellipse') {
 			const {cX, cY, xRadius, yRadius} = innerPoints[0];
 			ctx.beginPath();
@@ -539,8 +577,8 @@ const redrawPoints = () => {
 			let nextPoint = innerPoints[j + 1];
 
 			//in case array size is just 1 (indicates a single "dot" on the canvas)
-			if(nextPoint === undefined) {
-				nextPoint = currPoint
+			if (nextPoint === undefined) {
+				nextPoint = currPoint;
 			}
 
 			ctx.beginPath();
