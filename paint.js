@@ -547,7 +547,10 @@ const handleUndo = () => {
 	//console.log('after: ', pointsData);
 };
 
-const resetCanvas = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+const resetCanvas = () => {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	pointsData = [];
+};
 
 const redrawPoints = () => {
 	resetCanvas();
