@@ -176,7 +176,7 @@ document.querySelectorAll('.utility-button').forEach((utilityButton) => {
 				setButtonColor('free-draw');
 				break;
 			case 'delete':
-				resetCanvas();
+				trashCanvas();
 				break;
 			default:
 				break;
@@ -271,7 +271,6 @@ const handleFreeDraw = (e) => {
 };
 
 const handleDrawingCircle = (e) => {
-	console.log('in drawing circ');
 	const x = e.clientX - offsetX;
 	const y = e.clientY;
 
@@ -465,7 +464,6 @@ const canvasMouseDown = (e) => {
 
 	ctx.beginPath();
 	ctx.moveTo(e.clientX - offsetX, e.clientY);
-	console.log('MOUSE DOWN');
 
 	switch (currentDrawingState) {
 		case isDrawingCircle:
@@ -518,8 +516,6 @@ const canvasMouseDown = (e) => {
 const canvasMouseUp = (e) => {
 	isPainting = false;
 
-	//console.log(pointsData);
-
 	const {isFreeDrawing, isDrawingCircle, isDrawingRect} = drawingStates;
 
 	switch (currentDrawingState) {
@@ -539,18 +535,19 @@ const canvasMouseUp = (e) => {
 };
 
 const handleUndo = () => {
-	//console.log('before: ', pointsData);
 	pointsData.pop();
 
 	redrawPoints();
-
-	//console.log('after: ', pointsData);
 };
 
 const resetCanvas = () => {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	pointsData = [];
 };
+
+const trashCanvas = () => {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	pointsData = [];
+}
 
 const redrawPoints = () => {
 	resetCanvas();
